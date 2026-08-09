@@ -1,5 +1,7 @@
 package ui;
 
+import exception.StudentAlreadyExistsException;
+import exception.StudentNotFoundException;
 import model.Student;
 import service.StudentService;
 
@@ -12,6 +14,7 @@ public class Menu {
     private final Scanner scanner;
 
     public Menu(StudentService studentService) {
+
         this.studentService = studentService;
         this.scanner = new Scanner(System.in);
     }
@@ -50,9 +53,11 @@ public class Menu {
 
                 case "6":
                     running = false;
+
                     System.out.println(
                             "Thank you for using Student Management System."
                     );
+
                     break;
 
                 default:
@@ -99,7 +104,8 @@ public class Menu {
             String program = scanner.nextLine();
 
             System.out.print("Year of Study: ");
-            int yearOfStudy = Integer.parseInt(scanner.nextLine());
+            int yearOfStudy =
+                    Integer.parseInt(scanner.nextLine());
 
             Student student = new Student(
                     studentId,
@@ -112,12 +118,14 @@ public class Menu {
 
             studentService.addStudent(student);
 
-            System.out.println("Student added successfully!");
+            System.out.println(
+                    "Student added successfully!"
+            );
 
-        } catch (NumberFormatException e) {
+        } catch (StudentAlreadyExistsException e) {
 
             System.out.println(
-                    "Invalid year. Please enter a number."
+                    "Error: " + e.getMessage()
             );
 
         } catch (IllegalArgumentException e) {
@@ -132,10 +140,15 @@ public class Menu {
 
         System.out.println("\n===== ALL STUDENTS =====");
 
-        List<Student> students = studentService.getAllStudents();
+        List<Student> students =
+                studentService.getAllStudents();
 
         if (students.isEmpty()) {
-            System.out.println("No students found.");
+
+            System.out.println(
+                    "No students found."
+            );
+
             return;
         }
 
@@ -149,9 +162,12 @@ public class Menu {
         System.out.println("\n===== SEARCH STUDENT =====");
 
         System.out.print("Enter Student ID: ");
-        String studentId = scanner.nextLine();
 
-        Student student = studentService.findStudentById(studentId);
+        String studentId =
+                scanner.nextLine();
+
+        Student student =
+                studentService.findStudentById(studentId);
 
         if (student != null) {
 
@@ -160,7 +176,9 @@ public class Menu {
 
         } else {
 
-            System.out.println("Student not found.");
+            System.out.println(
+                    "Student not found."
+            );
         }
     }
 
@@ -171,50 +189,69 @@ public class Menu {
         try {
 
             System.out.print("Enter Student ID: ");
-            String studentId = scanner.nextLine();
+
+            String studentId =
+                    scanner.nextLine();
 
             Student existingStudent =
                     studentService.findStudentById(studentId);
 
             if (existingStudent == null) {
 
-                System.out.println("Student not found.");
-                return;
+                throw new StudentNotFoundException(
+                        "Student not found: " + studentId
+                );
             }
 
-            System.out.println("\nCurrent student details:");
+            System.out.println(
+                    "\nCurrent student details:"
+            );
+
             System.out.println(existingStudent);
 
             System.out.print("New First Name: ");
-            String firstName = scanner.nextLine();
+            String firstName =
+                    scanner.nextLine();
 
             System.out.print("New Last Name: ");
-            String lastName = scanner.nextLine();
+            String lastName =
+                    scanner.nextLine();
 
             System.out.print("New Email: ");
-            String email = scanner.nextLine();
+            String email =
+                    scanner.nextLine();
 
             System.out.print("New Program: ");
-            String program = scanner.nextLine();
+            String program =
+                    scanner.nextLine();
 
             System.out.print("New Year of Study: ");
+
             int yearOfStudy =
                     Integer.parseInt(scanner.nextLine());
 
-            boolean updated = studentService.updateStudent(
-                    studentId,
-                    firstName,
-                    lastName,
-                    email,
-                    program,
-                    yearOfStudy
-            );
+            boolean updated =
+                    studentService.updateStudent(
+                            studentId,
+                            firstName,
+                            lastName,
+                            email,
+                            program,
+                            yearOfStudy
+                    );
 
             if (updated) {
+
                 System.out.println(
                         "Student updated successfully!"
                 );
             }
+
+        } catch (StudentNotFoundException e) {
+
+            System.out.println(
+                    "Error: " + e.getMessage()
+            );
 
         } catch (NumberFormatException e) {
 
@@ -234,21 +271,28 @@ public class Menu {
 
         System.out.println("\n===== DELETE STUDENT =====");
 
-        System.out.print("Enter Student ID: ");
-        String studentId = scanner.nextLine();
+        try {
 
-        boolean deleted =
-                studentService.deleteStudent(studentId);
+            System.out.print("Enter Student ID: ");
 
-        if (deleted) {
+            String studentId =
+                    scanner.nextLine();
+
+            boolean deleted =
+                    studentService.deleteStudent(studentId);
+
+            if (deleted) {
+
+                System.out.println(
+                        "Student deleted successfully!"
+                );
+            }
+
+        } catch (StudentNotFoundException e) {
 
             System.out.println(
-                    "Student deleted successfully!"
+                    "Error: " + e.getMessage()
             );
-
-        } else {
-
-            System.out.println("Student not found.");
         }
     }
 }

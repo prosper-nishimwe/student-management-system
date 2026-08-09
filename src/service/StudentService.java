@@ -1,5 +1,7 @@
 package service;
 
+import exception.StudentAlreadyExistsException;
+import exception.StudentNotFoundException;
 import model.Student;
 import repository.StudentRepository;
 
@@ -65,8 +67,9 @@ public class StudentService {
         }
 
         if (findStudentById(student.getStudentId()) != null) {
-            throw new IllegalArgumentException(
-                    "Student ID already exists."
+            throw new StudentAlreadyExistsException(
+                    "Student ID already exists: "
+                            + student.getStudentId()
             );
         }
 
@@ -109,7 +112,9 @@ public class StudentService {
         Student student = findStudentById(studentId);
 
         if (student == null) {
-            return false;
+            throw new StudentNotFoundException(
+                    "Student not found: " + studentId
+            );
         }
 
         if (isBlank(firstName)) {
@@ -157,16 +162,17 @@ public class StudentService {
 
         Student student = findStudentById(studentId);
 
-        if (student != null) {
-
-            students.remove(student);
-
-            repository.saveAll(students);
-
-            return true;
+        if (student == null) {
+            throw new StudentNotFoundException(
+                    "Student not found: " + studentId
+            );
         }
 
-        return false;
+        students.remove(student);
+
+        repository.saveAll(students);
+
+        return true;
     }
 
     private boolean isBlank(String value) {
