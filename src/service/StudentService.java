@@ -1,38 +1,61 @@
 package service;
 
 import model.Student;
+import repository.StudentRepository;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class StudentService {
 
-    private final List<Student> students = new ArrayList<>();
+    private final List<Student> students;
+    private final StudentRepository repository;
+
+    public StudentService() {
+
+        repository = new StudentRepository();
+
+        students = new ArrayList<>(
+                repository.loadAll()
+        );
+    }
 
     public void addStudent(Student student) {
 
         if (student == null) {
-            throw new IllegalArgumentException("Student cannot be null.");
+            throw new IllegalArgumentException(
+                    "Student cannot be null."
+            );
         }
 
         if (isBlank(student.getStudentId())) {
-            throw new IllegalArgumentException("Student ID cannot be empty.");
+            throw new IllegalArgumentException(
+                    "Student ID cannot be empty."
+            );
         }
 
         if (isBlank(student.getFirstName())) {
-            throw new IllegalArgumentException("First name cannot be empty.");
+            throw new IllegalArgumentException(
+                    "First name cannot be empty."
+            );
         }
 
         if (isBlank(student.getLastName())) {
-            throw new IllegalArgumentException("Last name cannot be empty.");
+            throw new IllegalArgumentException(
+                    "Last name cannot be empty."
+            );
         }
 
         if (isBlank(student.getEmail())) {
-            throw new IllegalArgumentException("Email cannot be empty.");
+            throw new IllegalArgumentException(
+                    "Email cannot be empty."
+            );
         }
 
         if (isBlank(student.getProgram())) {
-            throw new IllegalArgumentException("Program cannot be empty.");
+            throw new IllegalArgumentException(
+                    "Program cannot be empty."
+            );
         }
 
         if (student.getYearOfStudy() < 1) {
@@ -48,9 +71,12 @@ public class StudentService {
         }
 
         students.add(student);
+
+        repository.saveAll(students);
     }
 
     public List<Student> getAllStudents() {
+
         return new ArrayList<>(students);
     }
 
@@ -62,7 +88,9 @@ public class StudentService {
 
         for (Student student : students) {
 
-            if (student.getStudentId().equalsIgnoreCase(studentId)) {
+            if (student.getStudentId()
+                    .equalsIgnoreCase(studentId)) {
+
                 return student;
             }
         }
@@ -120,6 +148,8 @@ public class StudentService {
         student.setProgram(program);
         student.setYearOfStudy(yearOfStudy);
 
+        repository.saveAll(students);
+
         return true;
     }
 
@@ -128,7 +158,11 @@ public class StudentService {
         Student student = findStudentById(studentId);
 
         if (student != null) {
+
             students.remove(student);
+
+            repository.saveAll(students);
+
             return true;
         }
 
@@ -136,6 +170,8 @@ public class StudentService {
     }
 
     private boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
+
+        return value == null ||
+                value.trim().isEmpty();
     }
 }
